@@ -1,0 +1,753 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Michael Dealership | Premium Cars</title>
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ==================================================
+     NAVBAR
+================================================== -->
+
+<header class="navbar">
+
+    <a href="#home" class="logo">
+        <strong>MICHAEL</strong>
+        <span>DEALERSHIP</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#inventory">Inventory</a>
+        <a href="#categories">Categories</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav-actions">
+
+        <button class="cart-btn" id="openCart" type="button">
+            <i class="fa-solid fa-cart-shopping"></i>
+            <span>Cart</span>
+            <b id="cartCount">0</b>
+        </button>
+
+        <button
+            class="menu-btn"
+            id="menuBtn"
+            type="button"
+            aria-label="Open menu"
+        >
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </div>
+
+</header>
+
+
+<!-- ==================================================
+     HERO
+================================================== -->
+
+<section class="hero" id="home">
+
+    <div class="hero-content">
+
+        <p class="eyebrow">
+            PREMIUM AUTOMOTIVE EXPERIENCE
+        </p>
+
+        <h1>
+            DRIVE YOUR
+            <span>DREAM.</span>
+        </h1>
+
+        <p>
+            Discover premium vehicles carefully selected
+            for performance, luxury, comfort and style.
+        </p>
+
+        <div class="hero-buttons">
+
+            <a href="#inventory" class="btn btn-primary">
+                Explore Cars
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+
+            <a href="#contact" class="btn btn-outline">
+                Contact Us
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="hero-image">
+
+        <img
+            src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1400&q=90"
+            alt="BMW X5"
+        >
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     STATS
+================================================== -->
+
+<section class="stats">
+
+    <div class="stat">
+        <i class="fa-solid fa-car"></i>
+        <div>
+            <strong>100+</strong>
+            <small>Vehicles</small>
+        </div>
+    </div>
+
+    <div class="stat">
+        <i class="fa-solid fa-users"></i>
+        <div>
+            <strong>5K+</strong>
+            <small>Customers</small>
+        </div>
+    </div>
+
+    <div class="stat">
+        <i class="fa-solid fa-star"></i>
+        <div>
+            <strong>4.9/5</strong>
+            <small>Rating</small>
+        </div>
+    </div>
+
+    <div class="stat">
+        <i class="fa-solid fa-shield-halved"></i>
+        <div>
+            <strong>100%</strong>
+            <small>Trusted</small>
+        </div>
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     INVENTORY
+================================================== -->
+
+<section class="section inventory" id="inventory">
+
+    <div class="section-title">
+
+        <div>
+            <p class="eyebrow">OUR INVENTORY</p>
+
+            <h2>
+                Find Your
+                <span>Perfect Car</span>
+            </h2>
+        </div>
+
+        <p>
+            Browse our collection of premium vehicles.
+        </p>
+
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="filters">
+
+        <div class="search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="search"
+                id="searchInput"
+                placeholder="Search by car name, brand or category..."
+                autocomplete="off"
+            >
+
+            <button
+                id="clearSearch"
+                type="button"
+                class="clear-search"
+                aria-label="Clear search"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <select id="categoryFilter">
+
+            <option value="all">All Categories</option>
+            <option value="SUV">SUV</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Sports">Sports</option>
+            <option value="Luxury">Luxury</option>
+            <option value="Truck">Truck</option>
+            <option value="Electric">Electric</option>
+
+        </select>
+
+    </div>
+
+
+    <div class="inventory-status">
+
+        <span id="carFound">
+            0 vehicles found
+        </span>
+
+        <button id="resetFilters" type="button">
+            Reset Filters
+        </button>
+
+    </div>
+
+
+    <div class="cars-grid" id="carsContainer"></div>
+
+</section>
+
+
+<!-- ==================================================
+     CATEGORIES
+================================================== -->
+
+<section class="section categories" id="categories">
+
+    <div class="section-title centered">
+
+        <p class="eyebrow">EXPLORE</p>
+
+        <h2>
+            Browse By
+            <span>Category</span>
+        </h2>
+
+        <p>
+            Find the perfect vehicle for your lifestyle.
+        </p>
+
+    </div>
+
+
+    <div class="category-grid">
+
+        <button class="category-card" data-category="SUV">
+
+            <img
+                src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=900&q=85"
+                alt="SUV"
+            >
+
+            <span>
+                <strong>SUV</strong>
+                <small>Powerful & spacious</small>
+            </span>
+
+        </button>
+
+
+        <button class="category-card" data-category="Sedan">
+
+            <img
+                src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=900&q=85"
+                alt="Sedan"
+            >
+
+            <span>
+                <strong>Sedan</strong>
+                <small>Comfort & elegance</small>
+            </span>
+
+        </button>
+
+
+        <button class="category-card" data-category="Sports">
+
+            <img
+                src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85"
+                alt="Sports car"
+            >
+
+            <span>
+                <strong>Sports</strong>
+                <small>Speed & performance</small>
+            </span>
+
+        </button>
+
+
+        <button class="category-card" data-category="Luxury">
+
+            <img
+                src="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=900&q=85"
+                alt="Luxury car"
+            >
+
+            <span>
+                <strong>Luxury</strong>
+                <small>Ultimate sophistication</small>
+            </span>
+
+        </button>
+
+
+        <button class="category-card" data-category="Truck">
+
+            <img
+                src="https://images.unsplash.com/photo-1551830820-330a71b99659?auto=format&fit=crop&w=900&q=85"
+                alt="Truck"
+            >
+
+            <span>
+                <strong>Truck</strong>
+                <small>Built for work</small>
+            </span>
+
+        </button>
+
+
+        <button class="category-card" data-category="Electric">
+
+            <img
+                src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?auto=format&fit=crop&w=900&q=85"
+                alt="Electric car"
+            >
+
+            <span>
+                <strong>Electric</strong>
+                <small>Future of driving</small>
+            </span>
+
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     ABOUT
+================================================== -->
+
+<section class="section about" id="about">
+
+    <div class="about-image">
+
+        <img
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=85"
+            alt="Premium car"
+        >
+
+    </div>
+
+
+    <div class="about-content">
+
+        <p class="eyebrow">
+            ABOUT MICHAEL DEALERSHIP
+        </p>
+
+        <h2>
+            We Don't Just Sell Cars.
+            <span>We Create Experiences.</span>
+        </h2>
+
+        <p>
+            At Michael Dealership, we believe buying a car
+            should be exciting, transparent and stress-free.
+        </p>
+
+        <p>
+            We offer carefully selected vehicles across
+            different categories to help every customer
+            find the right car.
+        </p>
+
+
+        <div class="features">
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Quality Vehicles
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Competitive Prices
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Trusted Service
+            </div>
+
+            <div>
+                <i class="fa-solid fa-circle-check"></i>
+                Customer Support
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     CONTACT
+================================================== -->
+
+<section class="section contact" id="contact">
+
+    <div class="section-title centered">
+
+        <p class="eyebrow">GET IN TOUCH</p>
+
+        <h2>
+            Let's Find Your
+            <span>Next Car</span>
+        </h2>
+
+        <p>
+            Have a question or want to schedule a viewing?
+            Contact us today.
+        </p>
+
+    </div>
+
+
+    <div class="contact-wrapper">
+
+        <div class="contact-details">
+
+            <div class="contact-item">
+
+                <div class="contact-icon">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+
+                <div>
+                    <h3>Phone</h3>
+                    <a href="tel:08123682308">
+                        08123682308
+                    </a>
+                </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+                <div class="contact-icon">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+
+                <div>
+                    <h3>Email</h3>
+                    <a href="mailto:michealokorieebube@gmail.com">
+                        michealokorieebube@gmail.com
+                    </a>
+                </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+                <div class="contact-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div>
+                    <h3>Location</h3>
+                    <p>Nigeria</p>
+                </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+                <div class="contact-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+
+                <div>
+                    <h3>Opening Hours</h3>
+                    <p>Monday - Saturday: 8AM - 7PM</p>
+                </div>
+
+            </div>
+
+
+            <a
+                class="whatsapp-btn"
+                href="https://wa.me/2348123682308"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <i class="fa-brands fa-whatsapp"></i>
+                Chat on WhatsApp
+            </a>
+
+        </div>
+
+
+        <form id="contactForm" class="contact-form" action="https://formspree.io/f/xaeyjkve" method="POST">
+
+            <div class="form-row">
+
+                <input
+                    type="text"
+                    id="contactName"
+                    name="name"
+                    placeholder="Your Name"
+                    required
+                >
+
+                <input
+                    type="email"
+                    id="contactEmail"
+                    name="email"
+                    placeholder="Email Address"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-row">
+
+                <input
+                    type="tel"
+                    id="contactPhone"
+                    name="phone"
+                    placeholder="Phone Number"
+                    required
+                >
+
+                <select id="contactCar" name="vehicle">
+
+                    <option value="">
+                        Interested Vehicle
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <textarea
+                id="contactMessage"
+                name="message"
+                placeholder="Your Message"
+                rows="6"
+                required
+            ></textarea>
+
+            <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Send Message
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- ==================================================
+     CART OVERLAY
+================================================== -->
+
+<div class="cart-overlay" id="cartOverlay"></div>
+
+
+<!-- ==================================================
+     CART SIDEBAR
+================================================== -->
+
+<aside class="cart-sidebar" id="cartSidebar">
+
+    <div class="cart-header">
+
+        <div>
+            <p class="eyebrow">YOUR CART</p>
+            <h2>Shopping Cart</h2>
+        </div>
+
+        <button
+            id="closeCart"
+            type="button"
+            aria-label="Close cart"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+    </div>
+
+
+    <div class="cart-items" id="cartItems"></div>
+
+
+    <div class="cart-footer">
+
+        <div class="cart-total">
+
+            <span>Total</span>
+
+            <strong id="cartTotal">
+                ₦0
+            </strong>
+
+        </div>
+
+
+        <button
+            id="checkoutButton"
+            class="checkout-btn"
+            type="button"
+        >
+            Proceed to Checkout
+            <i class="fa-solid fa-arrow-right"></i>
+        </button>
+
+    </div>
+
+</aside>
+
+
+<!-- ==================================================
+     CAR DETAILS MODAL
+================================================== -->
+
+<div class="modal-overlay" id="modalOverlay">
+
+    <div class="car-modal">
+
+        <button
+            class="modal-close"
+            id="closeModal"
+            type="button"
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+
+        <img id="modalImage" src="" alt="">
+
+
+        <div class="modal-body">
+
+            <p id="modalCategory" class="eyebrow"></p>
+
+            <h2 id="modalName"></h2>
+
+            <h3 id="modalPrice"></h3>
+
+            <p id="modalDescription"></p>
+
+
+            <button
+                id="modalAddCart"
+                class="btn btn-primary"
+                type="button"
+            >
+                Add To Cart
+                <i class="fa-solid fa-cart-plus"></i>
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==================================================
+     FOOTER
+================================================== -->
+
+<footer>
+
+    <div class="footer-logo">
+        <strong>MICHAEL</strong>
+        <span>DEALERSHIP</span>
+    </div>
+
+    <p>
+        Premium cars. Exceptional service.
+    </p>
+
+    <div class="socials">
+
+        <a href="#" aria-label="Facebook">
+            <i class="fa-brands fa-facebook"></i>
+        </a>
+
+        <a href="#" aria-label="Instagram">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+
+        <a href="#" aria-label="X">
+            <i class="fa-brands fa-x-twitter"></i>
+        </a>
+
+        <a
+            href="https://wa.me/2348123682308"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+        >
+            <i class="fa-brands fa-whatsapp"></i>
+        </a>
+
+    </div>
+
+    <p class="copyright">
+        © 2026 Michael Dealership. All Rights Reserved.
+    </p>
+
+</footer>
+
+
+<!-- JavaScript -->
+<script src="script.js"></script>
+
+</body>
+</html>
+

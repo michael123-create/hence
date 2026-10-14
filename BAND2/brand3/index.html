@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4D Fighter: Hyper-Space Arena</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050508;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            user-select: none;
+        }
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+        .player-hud {
+            width: 40%;
+            background: rgba(15, 15, 25, 0.7);
+            border: 2px solid #334;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        .health-bar-container {
+            width: 100%;
+            height: 20px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .health-bar {
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s ease;
+        }
+        #p1-health { background: linear-gradient(90deg, #ff416c, #ff4b2b); }
+        #p2-health { background: linear-gradient(90deg, #11998e, #38ef7d); }
+        
+        .w-tracker {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #controls-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10, 10, 15, 0.85);
+            border: 1px solid #445;
+            padding: 15px 25px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 13px;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(0,150,255,0.2);
+        }
+        .key {
+            background: #334;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #667;
+            color: #4facfe;
+            font-weight: bold;
+        }
+        #log {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #00f2fe;
+            text-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+            pointer-events: none;
+            height: 30px;
+        }
+    </style>
+    <!-- Include Three.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <div id="ui">
+        <div class="player-hud">
+            <h2>P1: HYPER-STRIKER</h2>
+            <div class="health-bar-container">
+                <div id="p1-health" class="health-bar"></div>
+            </div>
+            <div class="w-tracker">4D Spatial Depth (W-Axis): <span id="p1-w-val" style="color:#ff4b2b">0.00</span></div>
+        </div>
+
+        <div class="player-hud" style="text-align: right;">
+            <h2>P2: TESSERACT BOT</h2>
+            <div class="health-bar-container">
+                <div id="p2-health" class="health-bar"></div>
+            </div>
+            <div class="w-tracker">4D Spatial Depth (W-Axis): <span id="p2-w-val" style="color:#38ef7d">0.00</span></div>
+        </div>
+    </div>
+
+    <div id="log"></div>
+
+    <div id="controls-overlay">
+        <strong>CONTROLS (P1):</strong> 
+        Move: <span class="key">A</span> / <span class="key">D</span> | 
+        4D Shift (W-Axis): <span class="key">W</span> / <span class="key">S</span> | 
+        Punch: <span class="key">F</span> | 
+        Kick: <span class="key">G</span> | 
+        <span style="color:#00f2fe;">4D Internal Strike:</span> <span class="key">R</span>
+    </div>
+
+    <script>
+        // --- 1. SCENE & RENDERER SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x050508, 0.03);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2.5, 8);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        // --- 2. ENVIRONMENT & LIGHTING ---
+        const gridHelper = new THREE.GridHelper(30, 30, 0x00f2fe, 0x112244);
+        gridHelper.position.y = -2;
+        scene.add(gridHelper);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0x00f2fe, 0.8);
+        dirLight.position.set(5, 10, 7);
+        scene.add(dirLight);
+
+        // --- 3. 4D HUMANIFIED FIGHTER MODEL CLASS ---
+        // Generates a 4D Humanoid using a collection of joints connected in 4D space
+        class Fighter4D {
+            constructor(x, color, isAI = false) {
+                this.isAI = isAI;
+                this.color = color;
+                this.health = 100;
+                
+                // 4D Position Vector (X, Y, Z, W)
+                this.pos4D = { x: x, y: 0, z: 0, w: 0 };
+                
+                // Base 3D Mesh Group
+                this.group = new THREE.Group();
+                scene.add(this.group);
+
+                // Define local joint hierarchy (4D offsets from base position)
+                this.joints4D = {
+                    head:     { x: 0,    y: 1.5,  z: 0, w: 0, radius: 0.25 },
+                    torso:    { x: 0,    y: 0.8,  z: 0, w: 0, radius: 0.35 },
+                    lHand:    { x: -0.5, y: 0.8,  z: 0, w: 0, radius: 0.12 },
+                    rHand:    { x: 0.5,  y: 0.8,  z: 0, w: 0, radius: 0.12 },
+                    lFoot:    { x: -0.3, y: -0.8, z: 0, w: 0, radius: 0.15 },
+                    rFoot:    { x: 0.3,  y: -0.8, z: 0, w: 0, radius: 0.15 }
+                };
+
+                this.meshes = {};
+                this.createMeshRepresentations();
+
+                // State
+                this.isAttacking = false;
+                this.attackType = null;
+                this.attackProgress = 0;
+            }
+
+            createMeshRepresentations() {
+                // Build 3D mesh instances for each joint
+                for (let key in this.joints4D) {
+                    const j = this.joints4D[key];
+                    const geo = new THREE.SphereGeometry(j.radius, 16, 16);
+                    const mat = new THREE.MeshStandardMaterial({ 
+                        color: this.color, 
+                        roughness: 0.3,
+                        metalness: 0.8,
+                        transparent: true,
+                        opacity: 1.0
+                    });
+                    const mesh = new THREE.Mesh(geo, mat);
+                    this.meshes[key] = mesh;
+                    this.group.add(mesh);
+                }
+            }
+
+            // Project 4D positions to 3D and update visually according to W-depth slice
+            update4DRendering() {
+                const wDistanceScale = 0.4; // How strongly W distorts 3D perspective
+                
+                // Base position in 3D
+                this.group.position.x = this.pos4D.x;
+                this.group.position.y = this.pos4D.y;
+                this.group.position.z = this.pos4D.z;
+
+                // Visual slice representations: Opacity & Scaling shift based on W value
+                // Objects further along the W-axis appear faded and slightly distorted in 3D slice
+                const wAbs = Math.abs(this.pos4D.w);
+                const opacityVal = Math.max(0.15, 1 - wAbs * 0.25);
+
+                for (let key in this.joints4D) {
+                    const j = this.joints4D[key];
+                    const mesh = this.meshes[key];
+
+                    // Compute 4D Perspective Projection to 3D space: X' = X / (1 + W*scale)
+                    const wOffset = j.w + this.pos4D.w;
+                    const perspectiveFactor = 1 / (1 + wOffset * wDistanceScale);
+
+                    mesh.position.set(j.x * perspectiveFactor, j.y, j.z * perspectiveFactor);
+                    
+                    // Slice visualization effect:
+                    mesh.scale.setScalar(perspectiveFactor);
+                    mesh.material.opacity = opacityVal;
+
+                    // Color shift to indicate hyper-depth direction
+                    if (this.pos4D.w > 0) {
+                        mesh.material.color.setHSL(0.5, 0.8, 0.5); // Shift Blue/Cyan in +W
+                    } else if (this.pos4D.w < 0) {
+                        mesh.material.color.setHSL(0.9, 0.8, 0.5); // Shift Red/Magenta in -W
+                    } else {
+                        mesh.material.color.setHex(this.color);
+                    }
+                }
+            }
+
+            // Execute attack animations
+            animateAttacks() {
+                if (!this.isAttacking) return;
+
+                this.attackProgress += 0.08;
+                const p = Math.sin(this.attackProgress * Math.PI); // Smooth curve 0 -> 1 -> 0
+
+                if (this.attackType === 'punch') {
+                    this.joints4D.rHand.z = p * 1.2;
+                    this.joints4D.rHand.x = 0.5 + p * 0.2;
+                } else if (this.attackType === 'kick') {
+                    this.joints4D.rFoot.z = p * 1.5;
+                    this.joints4D.rFoot.y = -0.8 + p * 0.8;
+                } else if (this.attackType === 'internal') {
+                    // 4D Internal Strike extends directly along the W-axis!
+                    this.joints4D.rHand.w = p * 2.5;
+                    this.joints4D.rHand.z = p * 0.5;
+                }
+
+                if (this.attackProgress >= 1) {
+                    // Reset attack state
+                    this.isAttacking = false;
+                    this.attackProgress = 0;
+                    this.joints4D.rHand.z = 0;
+                    this.joints4D.rHand.x = 0.5;
+                    this.joints4D.rHand.w = 0;
+                    this.joints4D.rFoot.z = 0;
+                    this.joints4D.rFoot.y = -0.8;
+                }
+            }
+
+            triggerAttack(type) {
+                if (this.isAttacking) return;
+                this.isAttacking = true;
+                this.attackType = type;
+                this.attackProgress = 0;
+            }
+        }
+
+        // --- 4. INSTANTIATE FIGHTERS ---
+        const player1 = new Fighter4D(-2, 0xff416c);
+        const player2 = new Fighter4D(2, 0x38ef7d, true);
+
+        // --- 5. INPUT & COMBAT ENGINE ---
+        const keys = {};
+        window.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
+
+        function handleInput() {
+            const moveSpeed = 0.05;
+            const wSpeed = 0.04;
+
+            // Player 1 X-Movement
+            if (keys['a']) player1.pos4D.x -= moveSpeed;
+            if (keys['d']) player1.pos4D.x += moveSpeed;
+
+            // Player 1 W-Movement (4D Shift)
+            if (keys['w']) player1.pos4D.w += wSpeed;
+            if (keys['s']) player1.pos4D.w -= wSpeed;
+
+            // Clamp W to reasonable boundary
+            player1.pos4D.w = THREE.MathUtils.clamp(player1.pos4D.w, -3, 3);
+
+            // Attacks
+            if (keys['f']) player1.triggerAttack('punch');
+            if (keys['g']) player1.triggerAttack('kick');
+            if (keys['r']) player1.triggerAttack('internal');
+        }
+
+        // Simple AI Logic for P2
+        function updateAI() {
+            // AI slowly follows Player 1 along X and W
+            if (Math.random() < 0.03) {
+                if (player2.pos4D.w < player1.pos4D.w) player2.pos4D.w += 0.05;
+                if (player2.pos4D.w > player1.pos4D.w) player2.pos4D.w -= 0.05;
+            }
+
+            if (player2.pos4D.x > player1.pos4D.x + 1.2) player2.pos4D.x -= 0.02;
+            if (player2.pos4D.x < player1.pos4D.x - 1.2) player2.pos4D.x += 0.02;
+
+            // Random AI Attacks
+            if (Math.abs(player1.pos4D.x - player2.pos4D.x) < 1.8 && Math.random() < 0.02) {
+                const rand = Math.random();
+                if (rand < 0.4) player2.triggerAttack('punch');
+                else if (rand < 0.8) player2.triggerAttack('kick');
+                else player2.triggerAttack('internal');
+            }
+        }
+
+        function check4DHitboxes(attacker, defender, attackerName, defenderName) {
+            if (!attacker.isAttacking || attacker.attackProgress < 0.4 || attacker.attackProgress > 0.6) return;
+
+            // Distance calculations in 4D space!
+            const dx = (attacker.pos4D.x + attacker.joints4D.rHand.x) - defender.pos4D.x;
+            const dy = (attacker.pos4D.y + attacker.joints4D.rHand.y) - defender.pos4D.y;
+            const dz = (attacker.pos4D.z + attacker.joints4D.rHand.z) - defender.pos4D.z;
+            const dw = (attacker.pos4D.w + attacker.joints4D.rHand.w) - defender.pos4D.w;
+
+            // 4D Euclidean distance formula: sqrt(dx^2 + dy^2 + dz^2 + dw^2)
+            const dist4D = Math.sqrt(dx*dx + dy*dy + dz*dz + dw*dw);
+
+            let hitThreshold = 1.2;
+            let damage = 5;
+
+            // Special rules for 4D Internal Strike
+            if (attacker.attackType === 'internal') {
+                // Reaches through W space to hit directly regardless of 3D proximity
+                hitThreshold = 2.0; 
+                damage = 12;
+            }
+
+            if (dist4D < hitThreshold) {
+                defender.health = Math.max(0, defender.health - damage);
+                
+                // Update UI Health
+                const p1Bar = document.getElementById('p1-health');
+                const p2Bar = document.getElementById('p2-health');
+                p1Bar.style.width = player1.health + '%';
+                p2Bar.style.width = player2.health + '%';
+
+                showLog(`${attackerName} connected a 4D ${attacker.attackType.toUpperCase()}!`);
+            }
+        }
+
+        let logTimeout;
+        function showLog(msg) {
+            const logEl = document.getElementById('log');
+            logEl.innerText = msg;
+            clearTimeout(logTimeout);
+            logTimeout = setTimeout(() => { logEl.innerText = ''; }, 1000);
+        }
+
+        // --- 6. GAME LOOP ---
+        function animate() {
+            requestAnimationFrame(animate);
+
+            handleInput();
+            updateAI();
+
+            // Animate 4D model transformations
+            player1.animateAttacks();
+            player2.animateAttacks();
+
+            player1.update4DRendering();
+            player2.update4DRendering();
+
+            // Hit Detection
+            check4DHitboxes(player1, player2, "P1", "P2");
+            check4DHitboxes(player2, player1, "P2", "P1");
+
+            // Update HUD values
+            document.getElementById('p1-w-val').innerText = player1.pos4D.w.toFixed(2);
+            document.getElementById('p2-w-val').innerText = player2.pos4D.w.toFixed(2);
+
+            // Dynamically rotate camera slightly to emphasize 4D hyper-space perspective
+            camera.position.x = Math.sin(Date.now() * 0.0005) * 1.5;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Window Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Start Loop
+        animate();
+    </script>
+</body>
+</html>
